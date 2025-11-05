@@ -27,7 +27,7 @@ const About = () => {
         {/* Header Section */}
         <div className="text-center mb-16 animate-fade-in">
           <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-primary bg-clip-text text-transparent">
-            Conect TEA
+            Conecta TEA
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
             Uma plataforma inclusiva, acessível e interativa para pessoas com Transtorno do Espectro Autista
@@ -91,7 +91,7 @@ const About = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-foreground leading-relaxed">
-              O <span className="font-semibold text-primary">Conect TEA</span> nasceu a partir de um olhar sensível e atento 
+              O <span className="font-semibold text-primary">Conecta TEA</span> nasceu a partir de um olhar sensível e atento 
               para as necessidades de um público que ainda enfrenta muitas barreiras no dia a dia: pessoas com Transtorno do 
               Espectro Autista (TEA) e seus familiares.
             </p>
