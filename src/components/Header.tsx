@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sun, Moon, User, Home, Users, Gamepad2, BookOpen, Info, Type } from "lucide-react";
+import { Menu, X, Sun, Moon, User, Home, Users, Gamepad2, BookOpen, Info, Type, Plus, Minus } from "lucide-react";
 import favicon from "@/assets/favicon.png"; 
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -99,24 +99,28 @@ const Header = ({ isDark, toggleTheme }: HeaderProps) => {
             <Button
               variant="outline"
               size="icon"
-              onClick={() => changeFontSize(true)}
-              className="rounded-full"
-              aria-label="Aumentar fonte"
-              title="Aumentar fonte"
-            >
-              <Type className="w-5 h-5" />
-              <span className="text-xs font-bold absolute">+</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
               onClick={() => changeFontSize(false)}
               className="rounded-full"
               aria-label="Diminuir fonte"
               title="Diminuir fonte"
             >
-              <Type className="w-4 h-4" />
-              <span className="text-xs font-bold absolute">-</span>
+              <div className="flex items-center justify-center gap-0.5">
+                <Type className="w-3.5 h-3.5" />
+                <Minus className="w-3 h-3" />
+              </div>
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => changeFontSize(true)}
+              className="rounded-full"
+              aria-label="Aumentar fonte"
+              title="Aumentar fonte"
+            >
+              <div className="flex items-center justify-center gap-0.5">
+                <Type className="w-4 h-4" />
+                <Plus className="w-3.5 h-3.5" />
+              </div>
             </Button>
             <Button
               variant="outline"

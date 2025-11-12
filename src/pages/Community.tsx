@@ -35,7 +35,7 @@ const Community = () => {
   const [selectedCategory, setSelectedCategory] = useState("Todos");
   const [sortBy, setSortBy] = useState<"recent" | "popular">("recent");
   const [expandedPost, setExpandedPost] = useState<string | null>(null);
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [editingPost, setEditingPost] = useState<string | null>(null);
 
   const [posts, setPosts] = useState<Post[]>([]);
@@ -193,7 +193,8 @@ const Community = () => {
       return;
     }
 
-    if (!newComment.trim()) return;
+    const commentText = newComment[postId] || "";
+    if (!commentText.trim()) return;
 
     try {
       const comment: Omit<Comment, 'id'> = {
@@ -201,14 +202,14 @@ const Community = () => {
         author: user.name,
         authorId: user.id,
         avatar: user.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.id}`,
-        content: newComment,
+        content: commentText,
         timestamp: "Agora",
         createdAt: Date.now(),
       };
 
       await createComment(comment);
       await loadComments(postId);
-      setNewComment("");
+      setNewComment(prev => ({ ...prev, [postId]: "" }));
       
       toast({
         title: "Comentário adicionado! 💬",
@@ -496,14 +497,14 @@ const Community = () => {
                         <div className="flex gap-2">
                           <Input
                             placeholder="Escreva um comentário..."
-                            value={newComment}
-                            onChange={(e) => setNewComment(e.target.value)}
+                            value={newComment[post.id] || ""}
+                            onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
                             onKeyPress={(e) => e.key === 'Enter' && handleAddComment(post.id)}
                           />
                           <Button 
                             size="sm"
                             onClick={() => handleAddComment(post.id)}
-                            disabled={!newComment.trim()}
+                            disabled={!(newComment[post.id] || "").trim()}
                           >
                             <Send className="w-4 h-4" />
                           </Button>

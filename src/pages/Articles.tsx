@@ -3,8 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { BookOpen, ExternalLink, Search, Clock, TrendingUp, Languages } from "lucide-react";
+import { BookOpen, ExternalLink, Search, Clock, TrendingUp, Languages, BookOpenCheck } from "lucide-react";
 import TextToSpeech from "@/components/TextToSpeech";
+import ArticleReader from "@/components/ArticleReader";
 import { fetchAutismNews, translateText, NewsArticle as ApiArticle } from "@/services/newsApi";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +17,7 @@ interface Article {
   source: string;
   publishedAt: string;
   category: string;
+  content?: string;
 }
 
 const Articles = () => {
@@ -23,26 +25,42 @@ const Articles = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [translating, setTranslating] = useState<Record<string, boolean>>({});
+  const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [isReaderOpen, setIsReaderOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
     loadArticles();
   }, []);
 
-  const loadArticles = async () => {
-    setIsLoading(true);
+  const loadArticles = async (page: number = 1) => {
+    const isFirstLoad = page === 1;
+    if (isFirstLoad) {
+      setIsLoading(true);
+    } else {
+      setIsLoadingMore(true);
+    }
+    
     try {
-      const newsArticles = await fetchAutismNews();
+      const newsArticles = await fetchAutismNews(page);
       const formattedArticles: Article[] = newsArticles.map((article, index) => ({
-        id: `article-${index}`,
+        id: `article-${page}-${index}`,
         title: article.title,
         description: article.description,
         url: article.url,
         source: article.source,
         publishedAt: article.publishedAt,
         category: article.category,
+        content: article.content,
       }));
-      setArticles(formattedArticles);
+      
+      if (isFirstLoad) {
+        setArticles(formattedArticles);
+      } else {
+        setArticles(prev => [...prev, ...formattedArticles]);
+      }
     } catch (error) {
       console.error("Error loading articles:", error);
       toast({
@@ -51,8 +69,18 @@ const Articles = () => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      if (isFirstLoad) {
+        setIsLoading(false);
+      } else {
+        setIsLoadingMore(false);
+      }
     }
+  };
+
+  const handleLoadMore = async () => {
+    const nextPage = currentPage + 1;
+    setCurrentPage(nextPage);
+    await loadArticles(nextPage);
   };
 
   const handleTranslate = async (articleId: string) => {
@@ -88,10 +116,15 @@ const Articles = () => {
     }
   };
 
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    article.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const categories = ["Todos", "Diagnóstico", "Terapias", "Inclusão", "Qualidade de Vida", "Direitos"];
+  const [selectedCategory, setSelectedCategory] = useState("Todos");
+
+  const filteredArticles = articles.filter(article => {
+    const matchesSearch = article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      article.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesCategory = selectedCategory === "Todos" || article.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,8 +135,14 @@ const Articles = () => {
     });
   };
 
-  const categories = ["Todos", "Diagnóstico", "Terapias", "Inclusão", "Qualidade de Vida", "Direitos"];
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const handleReadArticle = (article: Article) => {
+    setSelectedArticle(article);
+    setIsReaderOpen(true);
+  };
+
+  const getArticleContent = (article: Article) => {
+    return article.content || article.description;
+  };
 
   return (
     <div className="min-h-screen py-8">
@@ -180,7 +219,7 @@ const Articles = () => {
                   <CardContent>
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <span className="text-sm text-muted-foreground">{article.source}</span>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <Button
                           variant="ghost"
                           size="sm"
@@ -193,15 +232,23 @@ const Articles = () => {
                           {translating[article.id] ? "Traduzindo..." : "PT-BR"}
                         </Button>
                         <Button 
+                          variant="default" 
+                          size="sm" 
+                          className="gap-2"
+                          onClick={() => handleReadArticle(article)}
+                        >
+                          <BookOpenCheck className="w-4 h-4" />
+                          Ler Aqui
+                        </Button>
+                        <Button 
                           variant="outline" 
                           size="sm" 
                           className="gap-2"
                           onClick={() => window.open(article.url, "_blank")}
                         >
                           <ExternalLink className="w-4 h-4" />
-                          Ler mais
+                          Ver Original
                         </Button>
-                        <TextToSpeech text={`${article.title}. ${article.description}`} />
                       </div>
                     </div>
                   </CardContent>
@@ -224,13 +271,34 @@ const Articles = () => {
             {/* Load More */}
             {filteredArticles.length > 0 && (
               <div className="text-center">
-                <Button variant="outline" size="lg" className="gap-2">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="gap-2"
+                  onClick={handleLoadMore}
+                  disabled={isLoadingMore}
+                >
                   <TrendingUp className="w-5 h-5" />
-                  Carregar Mais Artigos
+                  {isLoadingMore ? "Carregando..." : "Carregar Mais Artigos"}
                 </Button>
               </div>
             )}
           </>
+        )}
+
+        {/* Article Reader Dialog */}
+        {selectedArticle && (
+          <ArticleReader
+            isOpen={isReaderOpen}
+            onClose={() => {
+              setIsReaderOpen(false);
+              setSelectedArticle(null);
+            }}
+            title={selectedArticle.title}
+            content={getArticleContent(selectedArticle)}
+            url={selectedArticle.url}
+            source={selectedArticle.source}
+          />
         )}
 
         {/* Info Card */}

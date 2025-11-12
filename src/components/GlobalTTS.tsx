@@ -57,7 +57,11 @@ const GlobalTTS = () => {
     window.speechSynthesis.onvoiceschanged = loadVoices;
 
     return () => {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (error) {
+        console.error("Error cleaning up speech synthesis:", error);
+      }
     };
   }, []);
 
@@ -134,9 +138,14 @@ const GlobalTTS = () => {
   };
 
   const handleStop = () => {
-    window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-    setIsPaused(false);
+    try {
+      window.speechSynthesis.cancel();
+    } catch (error) {
+      console.error("Error stopping speech:", error);
+    } finally {
+      setIsSpeaking(false);
+      setIsPaused(false);
+    }
   };
 
   const handleVoiceChange = (voiceName: string) => {
