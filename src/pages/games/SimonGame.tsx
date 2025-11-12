@@ -155,19 +155,11 @@ const SimonGame = () => {
                   onClick={() => handleColorClick(color)}
                   disabled={isShowingSequence || !isPlaying || gameOver}
                   className={`
-                      aspect-square rounded-2xl transition-all duration-200
-                      ${activeColor === color ? colorMap[color].active : colorMap[color].bg}
-                      ${
-                        isShowingSequence
-                          ? activeColor === color
-                            ? "opacity-100 scale-105"
-                            : "opacity-50"
-                          : "opacity-100 hover:scale-105 hover:shadow-lg cursor-pointer"
-                      }
-                      ${!isPlaying || gameOver ? "opacity-50 cursor-not-allowed" : ""}
-                      disabled:cursor-not-allowed
-                    `}
-
+                    aspect-square rounded-2xl transition-all duration-200 
+                    ${activeColor === color ? colorMap[color].active : colorMap[color].bg}
+                    ${isShowingSequence || !isPlaying || gameOver ? "opacity-50 cursor-not-allowed" : "hover:scale-105 hover:shadow-lg cursor-pointer"}
+                    disabled:cursor-not-allowed
+                  `}
                   aria-label={colorMap[color].label}
                 />
               ))}
