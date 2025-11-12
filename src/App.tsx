@@ -8,7 +8,7 @@ import { ThemeProvider, useTheme } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import LoadingScreen from "@/components/LoadingScreen";
-import AccessibilityControls from "@/components/AccessibilityControls";
+import GlobalTTS from "@/components/GlobalTTS";
 
 // Lazy load pages
 const Index = lazy(() => import("./pages/Index"));
@@ -33,7 +33,7 @@ const AppContent = () => {
   return (
     <>
       <Header isDark={theme === "dark"} toggleTheme={toggleTheme} />
-      <AccessibilityControls />
+      <GlobalTTS />
       <Suspense fallback={<LoadingScreen />}>
         <Routes>
         <Route path="/" element={<Index />} />
